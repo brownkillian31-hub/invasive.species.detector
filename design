@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Invasive Species Detector</title>
+</head>
+<body>
+
+<h1>Upload an Image</h1>
+<input type="file" id="imageUpload" />
+<p id="result">Prediction will appear here</p>
+
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+<script src="https://cdn.jsdelivr.net/npm/@teachablemachine/image"></script>
+
+<script>
+const URL = "./";
+
+let model;
+
+async function loadModel() {
+  model = await tmImage.load(URL + "model.json", URL + "metadata.json");
+}
+
+loadModel();
+
+document.getElementById("imageUpload").addEventListener("change", async function(event) {
+  const file = event.target.files[0];
+  const img = document.createElement("img");
+  img.src = URL.createObjectURL(file);
+
+  img.onload = async () => {
+    const prediction = await model.predict(img);
+    let best = prediction.reduce((a, b) => a.probability > b.probability ? a : b);
+
+    document.getElementById("result").innerText =
+      best.className + " (" + (best.probability * 100).toFixed(2) + "%)";
+  };
+});
+</script>
+
+</body>
+</html>
